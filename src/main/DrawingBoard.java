@@ -9,12 +9,12 @@ import objects.*;
 
 public class DrawingBoard extends JPanel {
 
-	private MouseAdapter mouseAdapter; 
+	private MouseAdapter mouseAdapter;
 	private List<GObject> gObjects;
 	private GObject target;
-	
+
 	private int gridSize = 10;
-	
+
 	public DrawingBoard() {
 		gObjects = new ArrayList<GObject>();
 		mouseAdapter = new MAdapter();
@@ -22,23 +22,31 @@ public class DrawingBoard extends JPanel {
 		addMouseMotionListener(mouseAdapter);
 		setPreferredSize(new Dimension(800, 600));
 	}
-	
+
 	public void addGObject(GObject gObject) {
-		// TODO: Implement this method.
+		gObjects.add(gObject);
+		repaint();
 	}
-	
+
 	public void groupAll() {
-		// TODO: Implement this method.
+		CompositeGObject composite = new CompositeGObject();
+		for (GObject g : gObjects) {
+			composite.add(g);
+		}
+		gObjects.clear();
+		gObjects.add(composite);
+		repaint();
 	}
 
 	public void deleteSelected() {
-		// TODO: Implement this method.
+		target.deselected();
 	}
-	
+
 	public void clear() {
-		// TODO: Implement this method.
+		gObjects.clear();
+		repaint();
 	}
-	
+
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -71,22 +79,40 @@ public class DrawingBoard extends JPanel {
 	}
 
 	class MAdapter extends MouseAdapter {
+		private int x = 0;
+		private int y = 0;
 
-		// TODO: You need some variables here
-		
 		private void deselectAll() {
-			// TODO: Implement this method.
+			for (GObject g : gObjects) {
+				g.deselected();
+			}
+			repaint();
 		}
-		
+
 		@Override
 		public void mousePressed(MouseEvent e) {
-			// TODO: Implement this method.
+			this.deselectAll();
+			this.x = e.getX();
+			this.y = e.getY();
+			target = null;
+			for (GObject gObject : gObjects) {
+				if (gObject.pointerHit(x, y)) {
+					if(target == null) {
+						target = gObject;
+						target.selected();
+					}
+				}
+			}
+			repaint();
 		}
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			// TODO: Implement this method.
+			target.move(e.getX() - x, e.getY() - y);
+			x = e.getX();
+			y = e.getY();
+			repaint();
 		}
 	}
-	
+
 }
